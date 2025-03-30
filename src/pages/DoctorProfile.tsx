@@ -114,10 +114,12 @@ const DoctorProfile = () => {
         .filter(area => area.length > 0);
       
       const profileData = {
-        ...data,
+        full_name: data.full_name,
+        qualification: data.qualification,
         specialized_areas: specializedAreas,
+        phone_number: data.phone_number,
         user_id: user.id,
-        profile_photo_url: photoUrl,
+        profile_photo_url: photoUrl || '',
       };
       
       // Create or update profile in Supabase

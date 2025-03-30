@@ -1,5 +1,7 @@
 
-const contractABI = [
+import { AbiItem } from 'web3-utils';
+
+const contractABI: AbiItem[] = [
   {
     "inputs": [
       {

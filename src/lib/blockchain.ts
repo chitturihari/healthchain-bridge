@@ -1,5 +1,6 @@
 
 import Web3 from "web3";
+import { AbiItem } from "web3-utils";
 import contractABI from "../contracts/ABI";
 
 // This will be replaced with your actual contract address
@@ -14,7 +15,7 @@ export async function connectToBlockchain() {
     web3 = new Web3(window.ethereum);
     try {
       await window.ethereum.request({ method: "eth_requestAccounts" });
-      contract = new web3.eth.Contract(contractABI, contractAddress);
+      contract = new web3.eth.Contract(contractABI as AbiItem[], contractAddress);
       return true;
     } catch (error) {
       console.error("User denied account access");

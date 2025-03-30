@@ -22,7 +22,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPatientProfile, updatePatientProfile, uploadProfilePhoto } from '@/lib/supabase';
-import { connectWallet } from '@/contexts/AuthContext';
 import { registerPatient } from '@/lib/blockchain';
 
 const patientProfileSchema = z.object({
@@ -121,9 +120,15 @@ const PatientProfile = () => {
       }
       
       const profileData = {
-        ...data,
+        full_name: data.full_name,
+        date_of_birth: data.date_of_birth,
+        blood_group: data.blood_group,
+        weight: data.weight,
+        aadhar_number: data.aadhar_number,
+        phone_number: data.phone_number,
+        is_married: data.is_married,
         user_id: user.id,
-        profile_photo_url: photoUrl,
+        profile_photo_url: photoUrl || '',
       };
       
       // Create or update profile in Supabase

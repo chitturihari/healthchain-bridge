@@ -52,7 +52,7 @@ const SignIn = () => {
       console.log("Sign in successful, refreshing user data");
       await refreshUser();
       toast.success('Signed in successfully');
-      navigate('/dashboard');
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (error: any) {
       console.error('Sign in error:', error);
       
@@ -65,6 +65,7 @@ const SignIn = () => {
       }
       
       toast.error(errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };

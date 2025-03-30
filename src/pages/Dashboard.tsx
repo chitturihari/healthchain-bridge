@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -14,7 +13,6 @@ const Dashboard = () => {
   const { user, patientProfile, doctorProfile, isLoading, isWeb3Connected, connectWallet } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Redirect based on profile completion status
   if (!isLoading && user) {
     if (user.role === 'patient' && !patientProfile) {
       return <Navigate to="/patient-profile" />;
@@ -59,7 +57,6 @@ const Dashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Card */}
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>My Profile</CardTitle>
@@ -135,7 +132,7 @@ const Dashboard = () => {
                   <span className="text-muted-foreground">Wallet Status:</span>
                   <span>
                     {isWeb3Connected ? (
-                      <Badge variant="success" className="bg-green-100 text-green-800">Connected</Badge>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">Connected</Badge>
                     ) : (
                       <Badge variant="destructive" className="bg-red-100 text-red-800">Not Connected</Badge>
                     )}
@@ -153,7 +150,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Main Content Card */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <Tabs
@@ -257,7 +253,6 @@ const Dashboard = () => {
                 </div>
               </TabsContent>
               
-              {/* Placeholder tabs content - these will be implemented later */}
               <TabsContent value="vitals" className="mt-0">
                 <div className="text-center py-12">
                   <h3 className="text-xl font-medium mb-2">Vitals Tracking</h3>

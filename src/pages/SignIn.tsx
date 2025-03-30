@@ -42,16 +42,29 @@ const SignIn = () => {
   const onSubmit = async (data: SignInFormValues) => {
     setIsLoading(true);
     try {
+      console.log(`Attempting to sign in with email: ${data.email}`);
       const signInResult = await signIn(data.email, data.password);
-      console.log("Sign in successful:", signInResult);
       
+      if (!signInResult?.user) {
+        throw new Error('Failed to sign in. Please check your credentials.');
+      }
+      
+      console.log("Sign in successful, refreshing user data");
       await refreshUser();
       toast.success('Signed in successfully');
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Sign in error:', error);
-      toast.error(error.message || 'Failed to sign in');
-    } finally {
+      
+      // More specific error message based on the error type
+      let errorMessage = 'Failed to sign in';
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Please verify your email before signing in.';
+      }
+      
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };

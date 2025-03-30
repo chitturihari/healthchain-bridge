@@ -77,17 +77,23 @@ export async function signUp(email: string, password: string, role: UserRole) {
 
 export async function signIn(email: string, password: string) {
   console.log(`Signing in user with email: ${email}`);
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-  
-  if (error) {
-    console.error("Sign in error:", error);
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) {
+      console.error("Sign in error:", error);
+      throw error;
+    }
+    
+    console.log("Sign in successful:", data);
+    return data;
+  } catch (error) {
+    console.error("Sign in error caught:", error);
     throw error;
   }
-  console.log("Sign in successful:", data);
-  return data;
 }
 
 export async function signOut() {
@@ -114,28 +120,39 @@ export async function resetPassword(email: string) {
 
 export async function updatePassword(new_password: string) {
   console.log("Updating password");
-  const { error } = await supabase.auth.updateUser({
-    password: new_password
-  });
-  
-  if (error) {
-    console.error("Update password error:", error);
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: new_password
+    });
+    
+    if (error) {
+      console.error("Update password error:", error);
+      throw error;
+    }
+    
+    console.log("Password updated successfully");
+  } catch (error) {
+    console.error("Update password error caught:", error);
     throw error;
   }
-  console.log("Password updated successfully");
 }
 
 export async function getCurrentUser() {
   console.log("Getting current user");
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error) {
-    console.error("Get current user error:", error);
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) {
+      console.error("Get current user error:", error);
+      throw error;
+    }
+    
+    console.log("Current user retrieved:", user);
+    return user;
+  } catch (error) {
+    console.error("Get current user error caught:", error);
     throw error;
   }
-  
-  console.log("Current user retrieved:", user);
-  return user;
 }
 
 // Data functions

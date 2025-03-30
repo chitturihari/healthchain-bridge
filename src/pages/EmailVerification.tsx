@@ -34,15 +34,29 @@ const EmailVerification = () => {
     setIsLoading(true);
     try {
       console.log("Signing in with:", email);
-      await signIn(email, password);
-      console.log("Sign in successful");
+      const signInResult = await signIn(email, password);
       
+      if (!signInResult?.user) {
+        throw new Error('Failed to sign in. Please check your credentials.');
+      }
+      
+      console.log("Sign in successful, refreshing user data");
       await refreshUser();
       toast.success('Signed in successfully');
+      // Use a small delay to ensure the toast is visible before navigation
       setTimeout(() => navigate('/dashboard'), 1000);
     } catch (error: any) {
       console.error('Sign in error:', error);
-      toast.error(error.message || 'Failed to sign in');
+      
+      // More specific error message based on the error type
+      let errorMessage = 'Failed to sign in';
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Please verify your email before signing in.';
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -42,7 +42,9 @@ const SignIn = () => {
   const onSubmit = async (data: SignInFormValues) => {
     setIsLoading(true);
     try {
-      await signIn(data.email, data.password);
+      const signInResult = await signIn(data.email, data.password);
+      console.log("Sign in successful:", signInResult);
+      
       await refreshUser();
       toast.success('Signed in successfully');
       navigate('/dashboard');

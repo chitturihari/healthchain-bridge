@@ -58,6 +58,7 @@ export interface DoctorData {
 
 // Authentication functions
 export async function signUp(email: string, password: string, role: UserRole) {
+  console.log(`Signing up user with email: ${email} and role: ${role}`);
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -66,45 +67,74 @@ export async function signUp(email: string, password: string, role: UserRole) {
     }
   });
   
-  if (error) throw error;
+  if (error) {
+    console.error("Sign up error:", error);
+    throw error;
+  }
+  console.log("Sign up successful:", data);
   return data;
 }
 
 export async function signIn(email: string, password: string) {
+  console.log(`Signing in user with email: ${email}`);
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
   });
   
-  if (error) throw error;
+  if (error) {
+    console.error("Sign in error:", error);
+    throw error;
+  }
+  console.log("Sign in successful:", data);
   return data;
 }
 
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  if (error) {
+    console.error("Sign out error:", error);
+    throw error;
+  }
+  console.log("Sign out successful");
 }
 
 export async function resetPassword(email: string) {
+  console.log(`Sending password reset for email: ${email}`);
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password`
   });
   
-  if (error) throw error;
+  if (error) {
+    console.error("Reset password error:", error);
+    throw error;
+  }
+  console.log("Password reset email sent successfully");
 }
 
 export async function updatePassword(new_password: string) {
+  console.log("Updating password");
   const { error } = await supabase.auth.updateUser({
     password: new_password
   });
   
-  if (error) throw error;
+  if (error) {
+    console.error("Update password error:", error);
+    throw error;
+  }
+  console.log("Password updated successfully");
 }
 
 export async function getCurrentUser() {
+  console.log("Getting current user");
   const { data: { user }, error } = await supabase.auth.getUser();
   
-  if (error) throw error;
+  if (error) {
+    console.error("Get current user error:", error);
+    throw error;
+  }
+  
+  console.log("Current user retrieved:", user);
   return user;
 }
 

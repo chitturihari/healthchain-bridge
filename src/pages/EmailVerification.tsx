@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { signIn } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 const EmailVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { refreshUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,9 +33,13 @@ const EmailVerification = () => {
     
     setIsLoading(true);
     try {
+      console.log("Signing in with:", email);
       await signIn(email, password);
+      console.log("Sign in successful");
+      
+      await refreshUser();
       toast.success('Signed in successfully');
-      navigate('/dashboard');
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (error: any) {
       console.error('Sign in error:', error);
       toast.error(error.message || 'Failed to sign in');

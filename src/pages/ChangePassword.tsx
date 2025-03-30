@@ -49,9 +49,12 @@ const ChangePassword = () => {
   const onSubmit = async (data: PasswordFormValues) => {
     setIsLoading(true);
     try {
+      console.log("Updating password to:", data.password);
       await updatePassword(data.password);
+      console.log("Password updated successfully");
+      
       toast.success('Password updated successfully');
-      navigate('/dashboard');
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (error: any) {
       console.error('Update password error:', error);
       toast.error(error.message || 'Failed to update password');

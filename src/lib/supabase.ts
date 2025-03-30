@@ -1,11 +1,24 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Check if environment variables are available, otherwise use placeholders for development
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// We'll use placeholders for now, and these will be replaced with actual values provided by the user
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create a check to ensure we don't create a client with empty values
+if (!supabaseUrl) {
+  console.error('Missing Supabase URL. Please set the VITE_SUPABASE_URL environment variable.');
+}
+
+if (!supabaseAnonKey) {
+  console.error('Missing Supabase Anon Key. Please set the VITE_SUPABASE_ANON_KEY environment variable.');
+}
+
+// Use dummy values for local development if environment variables are not set
+// In production, this should be properly configured
+const effectiveUrl = supabaseUrl || 'https://placeholder-project.supabase.co';
+const effectiveKey = supabaseAnonKey || 'placeholder-key-for-development-only';
+
+export const supabase = createClient(effectiveUrl, effectiveKey);
 
 export type UserRole = 'doctor' | 'patient';
 

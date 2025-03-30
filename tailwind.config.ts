@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,34 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// HealthDecentro Theme Colors
+				health: {
+					'50': '#edfaff',
+					'100': '#d6f3ff',
+					'200': '#b5eaff',
+					'300': '#83dfff',
+					'400': '#48cbff',
+					'500': '#1eaedb',
+					'600': '#088ec7',
+					'700': '#0971a1',
+					'800': '#0f5f85',
+					'900': '#134e6f',
+					'950': '#0c3449',
+				},
+				medical: {
+					'50': '#f0fcff',
+					'100': '#e0f7fc',
+					'200': '#baf0f9',
+					'300': '#7de4f3',
+					'400': '#36cde6',
+					'500': '#18b3cc',
+					'600': '#0e91ab',
+					'700': '#11758b',
+					'800': '#166172',
+					'900': '#175160',
+					'950': '#09343f',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +112,22 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-ring': {
+					'0%': { transform: 'scale(0.8)', opacity: '0.8' },
+					'50%': { transform: 'scale(1)', opacity: '0.4' },
+					'100%': { transform: 'scale(0.8)', opacity: '0.8' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-ring': 'pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'float': 'float 6s ease-in-out infinite'
 			}
 		}
 	},

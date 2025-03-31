@@ -1,6 +1,7 @@
 
 import Web3 from "web3";
 import { AbiItem } from "web3-utils";
+import { toast } from "sonner";
 import contractABI from "../contracts/ABI";
 
 // This will be replaced with your actual contract address
@@ -53,11 +54,15 @@ export async function registerPatient(
   if (!web3 || !contract) await connectToBlockchain();
   const accounts = await web3.eth.getAccounts();
   try {
-    return await contract.methods
+    const tx = await contract.methods
       .registerPatient(fullName, dateOfBirth, weight, height, aadharNumber, bloodType, phoneNumber, isMarried)
       .send({ from: accounts[0] });
+    
+    toast.success("Patient registered on blockchain successfully");
+    return tx;
   } catch (error) {
     console.error("Error registering patient:", error);
+    toast.error("Failed to register patient on blockchain");
     throw error;
   }
 }
@@ -69,11 +74,15 @@ export async function registerDoctor(name: string, qualification: string, email:
   if (!web3 || !contract) await connectToBlockchain();
   const accounts = await web3.eth.getAccounts();
   try {
-    return await contract.methods
+    const tx = await contract.methods
       .registerDoctor(name, qualification, email, phone)
       .send({ from: accounts[0] });
+      
+    toast.success("Doctor registered on blockchain successfully");
+    return tx;
   } catch (error) {
     console.error("Error registering doctor:", error);
+    toast.error("Failed to register doctor on blockchain");
     throw error;
   }
 }
@@ -85,11 +94,15 @@ export async function uploadFile(cid: string, name: string, category: string, do
   if (!web3 || !contract) await connectToBlockchain();
   const accounts = await web3.eth.getAccounts();
   try {
-    return await contract.methods
+    const tx = await contract.methods
       .uploadFile(cid, name, category, dou, description)
       .send({ from: accounts[0] });
+      
+    toast.success("File record added to blockchain successfully");
+    return tx;
   } catch (error) {
     console.error("Error uploading file:", error);
+    toast.error("Failed to add file record to blockchain");
     throw error;
   }
 }
@@ -107,11 +120,15 @@ export async function addDailyReport(
   if (!web3 || !contract) await connectToBlockchain();
   const accounts = await web3.eth.getAccounts();
   try {
-    return await contract.methods
+    const tx = await contract.methods
       .addDailyReport(recorded_at, blood_pressure_systolic, blood_pressure_diastolic, blood_sugar, heart_rate)
       .send({ from: accounts[0] });
+      
+    toast.success("Vital signs recorded successfully");
+    return tx;
   } catch (error) {
     console.error("Error adding daily report:", error);
+    toast.error("Failed to record vital signs");
     throw error;
   }
 }
@@ -123,11 +140,15 @@ export async function grantAccess(doctorAddress: string) {
   if (!web3 || !contract) await connectToBlockchain();
   const accounts = await web3.eth.getAccounts();
   try {
-    return await contract.methods
+    const tx = await contract.methods
       .grantAccess(doctorAddress)
       .send({ from: accounts[0] });
+      
+    toast.success("Access granted to doctor successfully");
+    return tx;
   } catch (error) {
     console.error("Error granting access:", error);
+    toast.error("Failed to grant access to doctor");
     throw error;
   }
 }
@@ -139,11 +160,15 @@ export async function revokeAccess(doctorAddress: string) {
   if (!web3 || !contract) await connectToBlockchain();
   const accounts = await web3.eth.getAccounts();
   try {
-    return await contract.methods
+    const tx = await contract.methods
       .revokeAccess(doctorAddress)
       .send({ from: accounts[0] });
+      
+    toast.success("Access revoked from doctor successfully");
+    return tx;
   } catch (error) {
     console.error("Error revoking access:", error);
+    toast.error("Failed to revoke access from doctor");
     throw error;
   }
 }
@@ -161,6 +186,7 @@ export async function getPatientDetails(patientAddress: string) {
     return details;
   } catch (error) {
     console.error("Error fetching patient details:", error);
+    toast.error("Failed to fetch patient details from blockchain");
     throw error;
   }
 }
@@ -178,6 +204,7 @@ export async function getFiles(patientAddress: string) {
     return files;
   } catch (error) {
     console.error("Error fetching files:", error);
+    toast.error("Failed to fetch files from blockchain");
     throw error;
   }
 }
@@ -195,6 +222,7 @@ export async function getDailyReports(patientAddress: string) {
     return reports;
   } catch (error) {
     console.error("Error fetching daily reports:", error);
+    toast.error("Failed to fetch vital signs from blockchain");
     throw error;
   }
 }
@@ -212,6 +240,7 @@ export async function getDoctorDetails(doctorAddress: string) {
     return details;
   } catch (error) {
     console.error("Error fetching doctor details:", error);
+    toast.error("Failed to fetch doctor details from blockchain");
     throw error;
   }
 }

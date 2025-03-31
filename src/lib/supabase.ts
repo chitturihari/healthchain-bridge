@@ -137,7 +137,7 @@ export async function getCurrentUser() {
   }
 }
 
-// Add missing functions for password management
+// Add functions for password management
 export async function resetPassword(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/change-password`,

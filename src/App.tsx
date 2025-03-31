@@ -13,6 +13,9 @@ import DoctorProfile from "./pages/DoctorProfile";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import PatientVitals from "./pages/PatientVitals";
+import PatientDocuments from "./pages/PatientDocuments";
+import DoctorPatients from "./pages/DoctorPatients";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,9 @@ const App = () => (
             <Route path="/patient-profile" element={<PatientProfile />} />
             <Route path="/doctor-profile" element={<DoctorProfile />} />
             <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/vitals" element={<PatientVitals />} />
+            <Route path="/documents" element={<PatientDocuments />} />
+            <Route path="/patients" element={<DoctorPatients />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

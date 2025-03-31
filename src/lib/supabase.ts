@@ -1,7 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Check if environment variables are available, otherwise use placeholders for development
+// Check if environment variables are available
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -15,7 +15,6 @@ if (!supabaseAnonKey) {
 }
 
 // Use dummy values for local development if environment variables are not set
-// In production, this should be properly configured
 const effectiveUrl = supabaseUrl || 'https://placeholder-project.supabase.co';
 const effectiveKey = supabaseAnonKey || 'placeholder-key-for-development-only';
 
@@ -41,7 +40,7 @@ export interface PatientData {
   aadhar_number: string;
   phone_number: string;
   is_married: boolean;
-  eth_address?: string;
+  eth_address: string;
   profile_photo_url?: string;
   created_at: string;
 }
@@ -53,23 +52,14 @@ export interface DoctorData {
   qualification: string;
   specialized_areas: string[];
   phone_number: string;
-  eth_address?: string;
+  eth_address: string;
   profile_photo_url?: string;
   created_at: string;
 }
 
-export interface PatientDoctorAccess {
-  id: string;
-  patient_id: string;
-  doctor_id: string;
-  access_granted_at: string;
-  access_revoked_at?: string;
-  is_active: boolean;
-}
-
 // Authentication functions
-export async function signUp(email: string, password: string, role: UserRole, eth_address?: string) {
-  console.log(`Signing up user with email: ${email}, role: ${role}, and eth_address: ${eth_address || 'not provided'}`);
+export async function signUp(email: string, password: string, role: UserRole, eth_address: string) {
+  console.log(`Signing up user with email: ${email}, role: ${role}, and eth_address: ${eth_address}`);
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -85,8 +75,12 @@ export async function signUp(email: string, password: string, role: UserRole, et
     console.error("Sign up error:", error);
     throw error;
   }
+  
+  // Auto sign in the user after registration
+  const signInResult = await signIn(email, password);
+  
   console.log("Sign up successful:", data);
-  return data;
+  return signInResult;
 }
 
 export async function signIn(email: string, password: string) {
@@ -135,20 +129,6 @@ export async function getCurrentUser() {
     console.error("Get current user error caught:", error);
     throw error;
   }
-}
-
-// Add functions for password management
-export async function resetPassword(email: string) {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/change-password`,
-  });
-  
-  if (error) {
-    console.error("Reset password error:", error);
-    throw error;
-  }
-  
-  console.log("Password reset email sent");
 }
 
 export async function updatePassword(newPassword: string) {
@@ -227,94 +207,6 @@ export async function updateDoctorProfile(userId: string, updates: Partial<Docto
   
   if (error) throw error;
   return data[0] as DoctorData;
-}
-
-// Get doctor's patients
-export async function getDoctorPatients(doctorId: string) {
-  const { data, error } = await supabase
-    .from('patient_doctor_access')
-    .select(`
-      id,
-      patient_id,
-      access_granted_at,
-      access_revoked_at,
-      is_active,
-      patients:patient_id (
-        id,
-        full_name,
-        date_of_birth,
-        blood_group,
-        weight,
-        phone_number,
-        profile_photo_url
-      )
-    `)
-    .eq('doctor_id', doctorId)
-    .eq('is_active', true)
-    .is('access_revoked_at', null);
-  
-  if (error) throw error;
-  return data;
-}
-
-// Get patient's doctors
-export async function getPatientDoctors(patientId: string) {
-  const { data, error } = await supabase
-    .from('patient_doctor_access')
-    .select(`
-      id,
-      doctor_id,
-      access_granted_at,
-      access_revoked_at,
-      is_active,
-      doctors:doctor_id (
-        id,
-        full_name,
-        qualification,
-        specialized_areas,
-        phone_number,
-        profile_photo_url
-      )
-    `)
-    .eq('patient_id', patientId)
-    .eq('is_active', true)
-    .is('access_revoked_at', null);
-  
-  if (error) throw error;
-  return data;
-}
-
-// Grant access to doctor
-export async function grantAccessToDoctor(patientId: string, doctorId: string) {
-  const { data, error } = await supabase
-    .from('patient_doctor_access')
-    .upsert({
-      patient_id: patientId,
-      doctor_id: doctorId,
-      is_active: true,
-      access_granted_at: new Date().toISOString(),
-      access_revoked_at: null
-    })
-    .select();
-  
-  if (error) throw error;
-  return data[0];
-}
-
-// Revoke access from doctor
-export async function revokeAccessFromDoctor(patientId: string, doctorId: string) {
-  const { data, error } = await supabase
-    .from('patient_doctor_access')
-    .update({
-      is_active: false,
-      access_revoked_at: new Date().toISOString()
-    })
-    .eq('patient_id', patientId)
-    .eq('doctor_id', doctorId)
-    .select();
-  
-  if (error) throw error;
-  return data[0];
 }
 
 // File storage

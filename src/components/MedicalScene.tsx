@@ -1,102 +1,63 @@
 
-import React, { useEffect, useRef } from 'react';
-import { Stethoscope, UserCircle, Activity, Database, FileText } from 'lucide-react';
+import React from 'react';
+import { User, Activity, FileText, Heart } from 'lucide-react';
 
-const MedicalScene = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Simple animation for the elements
-    const interval = setInterval(() => {
-      const elements = containerRef.current?.querySelectorAll('.animated-icon');
-      elements?.forEach((el) => {
-        el.classList.toggle('pulse');
-      });
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, []);
-  
+const MedicalScene: React.FC = () => {
   return (
-    <div 
-      ref={containerRef}
-      className="relative w-full h-full rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 p-8 shadow-xl overflow-hidden"
-    >
-      {/* Connection lines */}
-      <div className="absolute left-1/2 top-1/2 w-[140px] h-[1px] bg-primary/30 -translate-x-[140px] -translate-y-[30px] transform rotate-[30deg]" />
-      <div className="absolute left-1/2 top-1/2 w-[140px] h-[1px] bg-primary/30 -translate-x-[140px] translate-y-[30px] transform -rotate-[30deg]" />
-      <div className="absolute left-1/2 top-1/2 w-[80px] h-[1px] bg-primary/30 translate-x-[10px]" />
-      
-      {/* Doctor */}
-      <div className="absolute top-[calc(50%-80px)] left-[calc(25%-40px)]">
-        <div className="relative flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center shadow-md animated-icon">
-            <Stethoscope className="h-10 w-10 text-blue-600" />
-          </div>
-          <span className="mt-2 text-sm font-medium">Doctor</span>
-          <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm animate-pulse">
-            <Activity className="h-3 w-3 text-green-500" />
-          </div>
-        </div>
-      </div>
-      
-      {/* Patient */}
-      <div className="absolute top-[calc(50%-80px)] right-[calc(25%-40px)]">
-        <div className="relative flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center shadow-md animated-icon">
-            <UserCircle className="h-10 w-10 text-green-600" />
-          </div>
-          <span className="mt-2 text-sm font-medium">Patient</span>
-          <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm animate-pulse">
-            <Activity className="h-3 w-3 text-green-500" />
-          </div>
-        </div>
-      </div>
-      
-      {/* Central blockchain element */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div className="relative flex flex-col items-center">
-          <div className="w-24 h-24 rounded-xl bg-primary/10 flex items-center justify-center shadow-md animated-icon">
-            <div className="grid grid-cols-2 grid-rows-2 gap-1 rotate-45">
-              <div className="w-6 h-6 bg-primary/20 rounded-md"></div>
-              <div className="w-6 h-6 bg-primary/30 rounded-md"></div>
-              <div className="w-6 h-6 bg-primary/30 rounded-md"></div>
-              <div className="w-6 h-6 bg-primary/20 rounded-md"></div>
+    <div className="w-full h-96 md:h-[450px] relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900">
+      {/* Animated 3D-like medical scene */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-full max-w-3xl mx-auto">
+          {/* Doctor representation */}
+          <div className="absolute left-10 md:left-40 top-1/2 transform -translate-y-1/2 animate-float">
+            <div className="relative">
+              <div className="size-20 md:size-32 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg">
+                <User className="size-10 md:size-16 text-white" strokeWidth={1.5} />
+              </div>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs md:text-sm font-medium shadow-md">
+                Doctor
+              </div>
             </div>
           </div>
-          <span className="mt-2 text-sm font-medium">Blockchain</span>
-        </div>
-      </div>
-      
-      {/* Documents/Pinata */}
-      <div className="absolute bottom-[calc(25%-40px)] left-[calc(30%-20px)]">
-        <div className="relative flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center shadow-md animated-icon">
-            <FileText className="h-10 w-10 text-purple-600" />
+
+          {/* Patient representation */}
+          <div className="absolute right-10 md:right-40 top-1/2 transform -translate-y-1/2 animate-float-delayed">
+            <div className="relative">
+              <div className="size-20 md:size-32 rounded-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg">
+                <User className="size-10 md:size-16 text-white" strokeWidth={1.5} />
+              </div>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs md:text-sm font-medium shadow-md">
+                Patient
+              </div>
+            </div>
           </div>
-          <span className="mt-2 text-sm font-medium">Medical Files</span>
-        </div>
-      </div>
-      
-      {/* Database/Supabase */}
-      <div className="absolute bottom-[calc(25%-40px)] right-[calc(30%-20px)]">
-        <div className="relative flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center shadow-md animated-icon">
-            <Database className="h-10 w-10 text-yellow-600" />
+
+          {/* Connecting elements */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 animate-pulse">
+            <div className="size-24 md:size-36 rounded-full bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center shadow-lg">
+              <Heart className="size-12 md:size-20 text-white" strokeWidth={1.5} />
+            </div>
+            
+            <div className="w-48 md:w-64 h-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 rounded-full shadow-md"></div>
+            
+            <div className="flex justify-center gap-5">
+              <div className="size-10 md:size-14 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-md">
+                <Activity className="size-5 md:size-8 text-white" strokeWidth={1.5} />
+              </div>
+              <div className="size-10 md:size-14 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-700 flex items-center justify-center shadow-md">
+                <FileText className="size-5 md:size-8 text-white" strokeWidth={1.5} />
+              </div>
+            </div>
           </div>
-          <span className="mt-2 text-sm font-medium">User Profiles</span>
         </div>
       </div>
-      
-      {/* Decorative elements */}
-      <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full bg-blue-200/50"></div>
-      <div className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-green-200/50"></div>
-      
-      {/* Add some particles floating effect */}
-      <div className="absolute w-2 h-2 rounded-full bg-primary/20 top-[20%] left-[30%] animate-float"></div>
-      <div className="absolute w-3 h-3 rounded-full bg-primary/10 top-[70%] left-[20%] animate-float" style={{ animationDelay: "1.5s" }}></div>
-      <div className="absolute w-2 h-2 rounded-full bg-primary/20 top-[30%] right-[20%] animate-float" style={{ animationDelay: "0.8s" }}></div>
-      <div className="absolute w-3 h-3 rounded-full bg-primary/10 bottom-[20%] right-[30%] animate-float" style={{ animationDelay: "2.2s" }}></div>
+
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute size-56 rounded-full bg-blue-500/10 -top-20 -left-20 animate-blob"></div>
+        <div className="absolute size-56 rounded-full bg-purple-500/10 top-40 right-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute size-56 rounded-full bg-green-500/10 bottom-10 left-40 animate-blob animation-delay-4000"></div>
+      </div>
     </div>
   );
 };

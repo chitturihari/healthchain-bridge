@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -18,18 +18,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { signUp, signIn } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { signUp } from '@/lib/supabase';
 import { getWalletAddress, connectToBlockchain } from '@/lib/blockchain';
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
   password: z
     .string()
-    .min(8, { message: 'Password must be at least 8 characters' })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-      message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
-    }),
+    .min(8, { message: 'Password must be at least 8 characters' }),
   confirmPassword: z.string(),
   role: z.enum(['patient', 'doctor'], {
     required_error: 'Please select a role',
@@ -43,7 +39,6 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isConnectingWallet, setIsConnectingWallet] = useState(false);
@@ -57,22 +52,6 @@ const SignUp = () => {
       role: 'patient',
     },
   });
-
-  useEffect(() => {
-    // Check if wallet is already connected
-    const checkWallet = async () => {
-      try {
-        const address = await getWalletAddress();
-        if (address) {
-          setWalletAddress(address);
-        }
-      } catch (error) {
-        console.error("Error checking wallet:", error);
-      }
-    };
-
-    checkWallet();
-  }, []);
 
   const connectWallet = async () => {
     setIsConnectingWallet(true);
@@ -94,23 +73,17 @@ const SignUp = () => {
   };
 
   const onSubmit = async (data: SignUpFormValues) => {
+    if (!walletAddress) {
+      toast.error('Please connect your wallet before signing up');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Register the user with wallet address if available
-      await signUp(data.email, data.password, data.role, walletAddress || undefined);
-      
-      // Auto sign in after registration
-      const signInResult = await signIn(data.email, data.password);
-      
-      if (!signInResult?.user) {
-        throw new Error('Failed to sign in after registration.');
-      }
-      
-      console.log("Sign in successful, refreshing user data");
-      await refreshUser();
-      
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+      // Register the user with wallet address
+      await signUp(data.email, data.password, data.role, walletAddress);
+      toast.success('Account created successfully! Redirecting to dashboard...');
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (error: any) {
       console.error('Sign up error:', error);
       toast.error(error.message || 'Failed to sign up');
@@ -164,7 +137,7 @@ const SignUp = () => {
                       />
                     </FormControl>
                     <FormDescription>
-                      Must be at least 8 characters with uppercase, lowercase and numbers
+                      Must be at least 8 characters
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -227,7 +200,7 @@ const SignUp = () => {
               
               <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Ethereum Wallet</span>
+                  <span className="text-sm">Ethereum Wallet (Required)</span>
                   {walletAddress ? (
                     <div className="text-right">
                       <span className="text-xs text-muted-foreground block">Connected:</span>
@@ -246,7 +219,7 @@ const SignUp = () => {
                   )}
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading || !walletAddress}>
                   {isLoading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </div>

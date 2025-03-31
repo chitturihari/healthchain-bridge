@@ -56,12 +56,7 @@ const SignIn = () => {
     } catch (error: any) {
       console.error('Sign in error:', error);
       
-      // More specific error message based on the error type
-      let errorMessage = 'Failed to sign in';
-      if (error.message.includes('Invalid login credentials')) {
-        errorMessage = 'Invalid email or password. Please try again.';
-      }
-      
+      let errorMessage = 'Invalid email or password. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);

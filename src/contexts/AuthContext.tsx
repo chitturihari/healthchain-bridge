@@ -25,7 +25,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Export the auth hook separately to maintain consistent exports for Fast Refresh
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -129,6 +128,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const patientData = await getPatientProfile(userData.id);
           setPatientProfile(patientData);
           setDoctorProfile(null);
+          
+          // Update ethAddress if available in profile
+          if (patientData.eth_address) {
+            setEthAddress(patientData.eth_address);
+          }
         } catch (error) {
           console.error('Error fetching patient profile:', error);
         }
@@ -137,6 +141,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const doctorData = await getDoctorProfile(userData.id);
           setDoctorProfile(doctorData);
           setPatientProfile(null);
+          
+          // Update ethAddress if available in profile
+          if (doctorData.eth_address) {
+            setEthAddress(doctorData.eth_address);
+          }
         } catch (error) {
           console.error('Error fetching doctor profile:', error);
         }

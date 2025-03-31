@@ -38,9 +38,23 @@ CREATE TABLE doctors (
   UNIQUE(eth_address)
 );
 
+-- Create doctor_patient_access table for managing access control
+CREATE TABLE doctor_patient_access (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  doctor_id UUID REFERENCES doctors(id) ON DELETE CASCADE NOT NULL,
+  patient_id UUID REFERENCES patients(id) ON DELETE CASCADE NOT NULL,
+  access_granted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  access_revoked_at TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(doctor_id, patient_id)
+);
+
 -- Enable Row Level Security
 ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE doctors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_patient_access ENABLE ROW LEVEL SECURITY;
 
 -- Patients table policies
 CREATE POLICY "Users can view their own patient profile"
@@ -67,6 +81,23 @@ WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own doctor profile"
 ON doctors FOR UPDATE
 USING (auth.uid() = user_id);
+
+-- Doctor-Patient Access policies
+CREATE POLICY "Doctors can view their patient access"
+ON doctor_patient_access FOR SELECT
+USING (doctor_id IN (SELECT id FROM doctors WHERE user_id = auth.uid()));
+
+CREATE POLICY "Patients can view their doctor access"
+ON doctor_patient_access FOR SELECT
+USING (patient_id IN (SELECT id FROM patients WHERE user_id = auth.uid()));
+
+CREATE POLICY "Patients can grant access to doctors"
+ON doctor_patient_access FOR INSERT
+WITH CHECK (patient_id IN (SELECT id FROM patients WHERE user_id = auth.uid()));
+
+CREATE POLICY "Patients can revoke access from doctors"
+ON doctor_patient_access FOR UPDATE
+USING (patient_id IN (SELECT id FROM patients WHERE user_id = auth.uid()));
 
 -- Create storage buckets for profile photos
 INSERT INTO storage.buckets (id, name, public) VALUES ('profile_photos', 'profile_photos', true);
@@ -100,4 +131,8 @@ FOR EACH ROW EXECUTE FUNCTION update_modified_column();
 
 CREATE TRIGGER update_doctors_updated_at
 BEFORE UPDATE ON doctors
+FOR EACH ROW EXECUTE FUNCTION update_modified_column();
+
+CREATE TRIGGER update_doctor_patient_access_updated_at
+BEFORE UPDATE ON doctor_patient_access
 FOR EACH ROW EXECUTE FUNCTION update_modified_column();

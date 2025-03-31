@@ -57,6 +57,16 @@ export interface DoctorData {
   created_at: string;
 }
 
+// Interface for doctor-patient access relationships
+export interface DoctorPatientAccess {
+  id: string;
+  doctor_id: string;
+  patient_id: string;
+  access_granted_at: string;
+  access_revoked_at?: string;
+  is_active: boolean;
+}
+
 // Authentication functions
 export async function signUp(email: string, password: string, role: UserRole, eth_address: string) {
   console.log(`Signing up user with email: ${email}, role: ${role}, and eth_address: ${eth_address}`);
@@ -144,6 +154,19 @@ export async function updatePassword(newPassword: string) {
   console.log("Password updated successfully");
 }
 
+export async function resetPassword(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  
+  if (error) {
+    console.error("Reset password error:", error);
+    throw error;
+  }
+  
+  console.log("Password reset email sent successfully");
+}
+
 // Data functions
 export async function createPatientProfile(patientData: Omit<PatientData, 'id' | 'created_at'>) {
   const { data, error } = await supabase
@@ -207,6 +230,90 @@ export async function updateDoctorProfile(userId: string, updates: Partial<Docto
   
   if (error) throw error;
   return data[0] as DoctorData;
+}
+
+// Doctor-Patient Relationship Functions
+export async function grantAccessToDoctor(patientId: string, doctorId: string) {
+  const { data, error } = await supabase
+    .from('doctor_patient_access')
+    .insert([
+      { 
+        doctor_id: doctorId,
+        patient_id: patientId,
+        is_active: true
+      }
+    ])
+    .select();
+  
+  if (error) throw error;
+  return data[0];
+}
+
+export async function revokeAccessFromDoctor(accessId: string) {
+  const { data, error } = await supabase
+    .from('doctor_patient_access')
+    .update({ 
+      is_active: false,
+      access_revoked_at: new Date().toISOString()
+    })
+    .eq('id', accessId)
+    .select();
+  
+  if (error) throw error;
+  return data[0];
+}
+
+// Get all patients that a doctor has access to
+export async function getDoctorPatients(doctorId: string) {
+  const { data, error } = await supabase
+    .from('doctor_patient_access')
+    .select(`
+      id,
+      patient_id,
+      access_granted_at,
+      access_revoked_at,
+      is_active,
+      patients:patient_id (
+        id,
+        full_name,
+        date_of_birth,
+        blood_group,
+        weight,
+        phone_number,
+        profile_photo_url
+      )
+    `)
+    .eq('doctor_id', doctorId)
+    .eq('is_active', true);
+  
+  if (error) throw error;
+  return data;
+}
+
+// Get all doctors that a patient has given access to
+export async function getPatientDoctors(patientId: string) {
+  const { data, error } = await supabase
+    .from('doctor_patient_access')
+    .select(`
+      id,
+      doctor_id,
+      access_granted_at,
+      access_revoked_at,
+      is_active,
+      doctors:doctor_id (
+        id,
+        full_name,
+        qualification,
+        specialized_areas,
+        phone_number,
+        profile_photo_url
+      )
+    `)
+    .eq('patient_id', patientId)
+    .eq('is_active', true);
+  
+  if (error) throw error;
+  return data;
 }
 
 // File storage

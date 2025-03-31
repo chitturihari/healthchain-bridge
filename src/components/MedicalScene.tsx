@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Doctor, Patient, Computer, Activity } from 'lucide-react';
+import { User, Users, Laptop, Activity } from 'lucide-react';
 
 const MedicalScene = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +31,7 @@ const MedicalScene = () => {
       <div className="absolute top-[calc(50%-80px)] left-[calc(25%-40px)]">
         <div className="relative flex flex-col items-center">
           <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center shadow-md animated-icon">
-            <Doctor className="h-10 w-10 text-blue-600" />
+            <User className="h-10 w-10 text-blue-600" />
           </div>
           <span className="mt-2 text-sm font-medium">Doctor</span>
           <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm animate-pulse">
@@ -44,7 +44,7 @@ const MedicalScene = () => {
       <div className="absolute top-[calc(50%-80px)] right-[calc(25%-40px)]">
         <div className="relative flex flex-col items-center">
           <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center shadow-md animated-icon">
-            <Patient className="h-10 w-10 text-green-600" />
+            <Users className="h-10 w-10 text-green-600" />
           </div>
           <span className="mt-2 text-sm font-medium">Patient</span>
           <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm animate-pulse">
@@ -72,7 +72,7 @@ const MedicalScene = () => {
       <div className="absolute bottom-[calc(25%-40px)] left-1/2 transform -translate-x-1/2">
         <div className="relative flex flex-col items-center">
           <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center shadow-md animated-icon">
-            <Computer className="h-10 w-10 text-purple-600" />
+            <Laptop className="h-10 w-10 text-purple-600" />
           </div>
           <span className="mt-2 text-sm font-medium">Secure Storage</span>
         </div>

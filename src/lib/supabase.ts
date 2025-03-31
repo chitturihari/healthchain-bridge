@@ -137,6 +137,33 @@ export async function getCurrentUser() {
   }
 }
 
+// Add missing functions for password management
+export async function resetPassword(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/change-password`,
+  });
+  
+  if (error) {
+    console.error("Reset password error:", error);
+    throw error;
+  }
+  
+  console.log("Password reset email sent");
+}
+
+export async function updatePassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword
+  });
+  
+  if (error) {
+    console.error("Update password error:", error);
+    throw error;
+  }
+  
+  console.log("Password updated successfully");
+}
+
 // Data functions
 export async function createPatientProfile(patientData: Omit<PatientData, 'id' | 'created_at'>) {
   const { data, error } = await supabase

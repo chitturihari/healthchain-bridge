@@ -16,6 +16,8 @@ interface PatientWithAccess {
   id: string;
   patient_id: string;
   access_granted_at: string;
+  access_revoked_at?: string;
+  is_active: boolean;
   patients: {
     id: string;
     full_name: string;
@@ -31,6 +33,8 @@ interface DoctorWithAccess {
   id: string;
   doctor_id: string;
   access_granted_at: string;
+  access_revoked_at?: string;
+  is_active: boolean;
   doctors: {
     id: string;
     full_name: string;
@@ -56,7 +60,8 @@ const Dashboard = () => {
         setIsLoadingPatients(true);
         try {
           const patientData = await getDoctorPatients(doctorProfile.id);
-          setPatients(patientData);
+          // Cast the data to ensure it matches our interface
+          setPatients(patientData as unknown as PatientWithAccess[]);
         } catch (error) {
           console.error('Error fetching patients:', error);
         } finally {
@@ -73,7 +78,8 @@ const Dashboard = () => {
         setIsLoadingDoctors(true);
         try {
           const doctorData = await getPatientDoctors(patientProfile.id);
-          setDoctors(doctorData);
+          // Cast the data to ensure it matches our interface
+          setDoctors(doctorData as unknown as DoctorWithAccess[]);
         } catch (error) {
           console.error('Error fetching doctors:', error);
         } finally {

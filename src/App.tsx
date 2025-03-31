@@ -10,6 +10,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import PatientProfile from "./pages/PatientProfile";
 import DoctorProfile from "./pages/DoctorProfile";
+import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/patient-profile" element={<PatientProfile />} />
             <Route path="/doctor-profile" element={<DoctorProfile />} />
+            <Route path="/change-password" element={<ChangePassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -20,6 +20,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { signUp } from '@/lib/supabase';
 import { getWalletAddress, connectToBlockchain } from '@/lib/blockchain';
+import { useAuth } from '@/contexts/AuthContext';
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -39,6 +40,7 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isConnectingWallet, setIsConnectingWallet] = useState(false);
@@ -81,9 +83,27 @@ const SignUp = () => {
     setIsLoading(true);
     try {
       // Register the user with wallet address
-      await signUp(data.email, data.password, data.role, walletAddress);
+      const signUpResult = await signUp(data.email, data.password, data.role, walletAddress);
+      
+      if (!signUpResult?.user) {
+        throw new Error('Failed to sign up. Please try again.');
+      }
+      
+      console.log("Sign up successful, refreshing user data");
+      await refreshUser();
+      
       toast.success('Account created successfully! Redirecting to dashboard...');
-      setTimeout(() => navigate('/dashboard'), 1000);
+      
+      // Explicitly navigate after a short delay
+      setTimeout(() => {
+        console.log("Navigating to dashboard");
+        if (data.role === 'patient') {
+          navigate('/patient-profile');
+        } else {
+          navigate('/doctor-profile');
+        }
+      }, 500);
+      
     } catch (error: any) {
       console.error('Sign up error:', error);
       toast.error(error.message || 'Failed to sign up');

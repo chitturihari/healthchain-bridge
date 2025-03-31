@@ -70,27 +70,33 @@ export interface DoctorPatientAccess {
 // Authentication functions
 export async function signUp(email: string, password: string, role: UserRole, eth_address: string) {
   console.log(`Signing up user with email: ${email}, role: ${role}, and eth_address: ${eth_address}`);
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { 
-        role,
-        eth_address
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { 
+          role,
+          eth_address
+        }
       }
+    });
+    
+    if (error) {
+      console.error("Sign up error:", error);
+      throw error;
     }
-  });
-  
-  if (error) {
-    console.error("Sign up error:", error);
+    
+    // Auto sign in the user after registration
+    console.log("Attempting to auto sign-in after registration");
+    const signInResult = await signIn(email, password);
+    
+    console.log("Sign up successful:", data);
+    return signInResult;
+  } catch (error) {
+    console.error("Sign up error caught:", error);
     throw error;
   }
-  
-  // Auto sign in the user after registration
-  const signInResult = await signIn(email, password);
-  
-  console.log("Sign up successful:", data);
-  return signInResult;
 }
 
 export async function signIn(email: string, password: string) {

@@ -21,6 +21,8 @@ type AuthContextType = {
   isWeb3Connected: boolean;
   refreshUser: () => Promise<void>;
   connectWallet: () => Promise<string | null>;
+  setPatientProfile: (profile: PatientData | null) => void;
+  setDoctorProfile: (profile: DoctorData | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -164,7 +166,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ethAddress,
       isWeb3Connected,
       refreshUser,
-      connectWallet
+      connectWallet,
+      setPatientProfile,
+      setDoctorProfile
     }}>
       {children}
     </AuthContext.Provider>

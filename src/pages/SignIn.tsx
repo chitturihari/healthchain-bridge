@@ -52,7 +52,13 @@ const SignIn = () => {
       console.log("Sign in successful, refreshing user data");
       await refreshUser();
       toast.success('Signed in successfully');
-      setTimeout(() => navigate('/dashboard'), 1000);
+      
+      // Explicitly navigate after a short delay
+      setTimeout(() => {
+        console.log("Navigating to dashboard");
+        navigate('/dashboard');
+      }, 500);
+
     } catch (error: any) {
       console.error('Sign in error:', error);
       

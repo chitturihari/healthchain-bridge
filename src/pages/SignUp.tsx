@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -18,8 +18,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { signUp } from '@/lib/supabase';
+import { signUp, signIn } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { getWalletAddress, connectToBlockchain } from '@/lib/blockchain';
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -44,6 +45,8 @@ const SignUp = () => {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -55,12 +58,59 @@ const SignUp = () => {
     },
   });
 
+  useEffect(() => {
+    // Check if wallet is already connected
+    const checkWallet = async () => {
+      try {
+        const address = await getWalletAddress();
+        if (address) {
+          setWalletAddress(address);
+        }
+      } catch (error) {
+        console.error("Error checking wallet:", error);
+      }
+    };
+
+    checkWallet();
+  }, []);
+
+  const connectWallet = async () => {
+    setIsConnectingWallet(true);
+    try {
+      const connected = await connectToBlockchain();
+      if (connected) {
+        const address = await getWalletAddress();
+        setWalletAddress(address);
+        toast.success('Wallet connected successfully');
+      } else {
+        toast.error('Failed to connect wallet');
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      toast.error('Error connecting wallet');
+    } finally {
+      setIsConnectingWallet(false);
+    }
+  };
+
   const onSubmit = async (data: SignUpFormValues) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.role);
-      toast.success('Signed up successfully! Please verify your email');
-      navigate('/verification', { state: { email: data.email, role: data.role } });
+      // Register the user with wallet address if available
+      await signUp(data.email, data.password, data.role, walletAddress || undefined);
+      
+      // Auto sign in after registration
+      const signInResult = await signIn(data.email, data.password);
+      
+      if (!signInResult?.user) {
+        throw new Error('Failed to sign in after registration.');
+      }
+      
+      console.log("Sign in successful, refreshing user data");
+      await refreshUser();
+      
+      toast.success('Account created successfully!');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Sign up error:', error);
       toast.error(error.message || 'Failed to sign up');
@@ -175,9 +225,31 @@ const SignUp = () => {
                 )}
               />
               
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
-              </Button>
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Ethereum Wallet</span>
+                  {walletAddress ? (
+                    <div className="text-right">
+                      <span className="text-xs text-muted-foreground block">Connected:</span>
+                      <span className="text-xs font-mono text-green-600">{`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</span>
+                    </div>
+                  ) : (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={connectWallet}
+                      disabled={isConnectingWallet}
+                    >
+                      {isConnectingWallet ? 'Connecting...' : 'Connect Wallet'}
+                    </Button>
+                  )}
+                </div>
+                
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                </Button>
+              </div>
             </form>
           </Form>
           

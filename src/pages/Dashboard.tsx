@@ -1,17 +1,89 @@
+
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronRight, User, FileText, Calendar, CalendarClock, Stethoscope, Activity } from 'lucide-react';
+import { getDoctorPatients, getPatientDoctors } from '@/lib/supabase';
+
+interface PatientWithAccess {
+  id: string;
+  patient_id: string;
+  access_granted_at: string;
+  patients: {
+    id: string;
+    full_name: string;
+    date_of_birth: string;
+    blood_group: string;
+    weight: number;
+    phone_number: string;
+    profile_photo_url?: string;
+  }
+}
+
+interface DoctorWithAccess {
+  id: string;
+  doctor_id: string;
+  access_granted_at: string;
+  doctors: {
+    id: string;
+    full_name: string;
+    qualification: string;
+    specialized_areas: string[];
+    phone_number: string;
+    profile_photo_url?: string;
+  }
+}
 
 const Dashboard = () => {
   const { user, patientProfile, doctorProfile, isLoading, isWeb3Connected, connectWallet } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const [patients, setPatients] = useState<PatientWithAccess[]>([]);
+  const [doctors, setDoctors] = useState<DoctorWithAccess[]>([]);
+  const [isLoadingPatients, setIsLoadingPatients] = useState(false);
+  const [isLoadingDoctors, setIsLoadingDoctors] = useState(false);
+
+  useEffect(() => {
+    // Fetch patients if user is a doctor
+    if (user?.role === 'doctor' && doctorProfile && activeTab === 'patients') {
+      const fetchPatients = async () => {
+        setIsLoadingPatients(true);
+        try {
+          const patientData = await getDoctorPatients(doctorProfile.id);
+          setPatients(patientData);
+        } catch (error) {
+          console.error('Error fetching patients:', error);
+        } finally {
+          setIsLoadingPatients(false);
+        }
+      };
+      
+      fetchPatients();
+    }
+    
+    // Fetch doctors if user is a patient
+    if (user?.role === 'patient' && patientProfile && activeTab === 'doctors') {
+      const fetchDoctors = async () => {
+        setIsLoadingDoctors(true);
+        try {
+          const doctorData = await getPatientDoctors(patientProfile.id);
+          setDoctors(doctorData);
+        } catch (error) {
+          console.error('Error fetching doctors:', error);
+        } finally {
+          setIsLoadingDoctors(false);
+        }
+      };
+      
+      fetchDoctors();
+    }
+  }, [user, doctorProfile, patientProfile, activeTab]);
 
   if (!isLoading && user) {
     if (user.role === 'patient' && !patientProfile) {
@@ -132,12 +204,21 @@ const Dashboard = () => {
                   <span className="text-muted-foreground">Wallet Status:</span>
                   <span>
                     {isWeb3Connected ? (
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">Connected</Badge>
+                      <Badge variant="outline" className="bg-green-100 text-green-800">Connected</Badge>
                     ) : (
-                      <Badge variant="destructive" className="bg-red-100 text-red-800">Not Connected</Badge>
+                      <Badge variant="outline" className="bg-red-100 text-red-800">Not Connected</Badge>
                     )}
                   </span>
                 </div>
+                
+                {user.eth_address && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground mb-1">ETH Address:</span>
+                    <span className="text-xs font-mono break-all">
+                      {user.eth_address}
+                    </span>
+                  </div>
+                )}
               </div>
               
               <div className="mt-6">
@@ -272,21 +353,165 @@ const Dashboard = () => {
               </TabsContent>
               
               <TabsContent value="doctors" className="mt-0">
-                <div className="text-center py-12">
-                  <h3 className="text-xl font-medium mb-2">My Doctors</h3>
-                  <p className="text-muted-foreground mb-6">
-                    This feature is coming soon. You'll be able to manage doctor access to your records here.
-                  </p>
-                </div>
+                {isLoadingDoctors ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : doctors.length > 0 ? (
+                  <div className="py-4">
+                    <h3 className="text-xl font-medium mb-4">Healthcare Providers With Access</h3>
+                    <div className="space-y-4">
+                      {doctors.map((doctor) => (
+                        <Card key={doctor.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <Avatar>
+                                <AvatarImage src={doctor.doctors.profile_photo_url} />
+                                <AvatarFallback>
+                                  {doctor.doctors.full_name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <h4 className="font-semibold">{doctor.doctors.full_name}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {doctor.doctors.qualification}
+                                </p>
+                              </div>
+                              <div className="ml-auto">
+                                <Button variant="outline" size="sm">
+                                  Revoke Access
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <h3 className="text-xl font-medium mb-2">No Doctors</h3>
+                    <p className="text-muted-foreground mb-6">
+                      You haven't granted access to any healthcare providers yet.
+                    </p>
+                    <Button variant="outline">Find Doctors</Button>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="patients" className="mt-0">
-                <div className="text-center py-12">
-                  <h3 className="text-xl font-medium mb-2">My Patients</h3>
-                  <p className="text-muted-foreground mb-6">
-                    This feature is coming soon. You'll be able to view your patients' records here.
-                  </p>
-                </div>
+                {isLoadingPatients ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : patients.length > 0 ? (
+                  <div className="py-4">
+                    <h3 className="text-xl font-medium mb-4">Your Patients</h3>
+                    <Accordion type="single" collapsible className="w-full space-y-4">
+                      {patients.map((patient) => (
+                        <AccordionItem key={patient.id} value={patient.id} className="border rounded-lg p-0 overflow-hidden">
+                          <AccordionTrigger className="px-4 py-3 hover:bg-muted/50 transition-all">
+                            <div className="flex items-center gap-3 w-full">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={patient.patients.profile_photo_url} />
+                                <AvatarFallback>
+                                  {patient.patients.full_name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="text-left">
+                                <h4 className="font-semibold">{patient.patients.full_name}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Blood Group: {patient.patients.blood_group}
+                                </p>
+                              </div>
+                              <Badge variant="outline" className="ml-auto mr-4">
+                                Active
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-4 pb-4">
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <Card>
+                                <CardHeader className="p-4">
+                                  <CardTitle className="text-base flex items-center gap-2">
+                                    <User className="h-4 w-4" /> Patient Details
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-4 py-2 space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">Date of Birth</span>
+                                    <span className="text-sm">{new Date(patient.patients.date_of_birth).toLocaleDateString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">Blood Group</span>
+                                    <span className="text-sm">{patient.patients.blood_group}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">Weight</span>
+                                    <span className="text-sm">{patient.patients.weight} kg</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">Phone</span>
+                                    <span className="text-sm">{patient.patients.phone_number}</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardHeader className="p-4">
+                                  <CardTitle className="text-base flex items-center gap-2">
+                                    <Activity className="h-4 w-4" /> Recent Vitals
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-4 py-2">
+                                  <div className="text-center py-6 text-muted-foreground text-sm">
+                                    No recent vital records available
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                            
+                            <div className="mt-4">
+                              <Card>
+                                <CardHeader className="p-4">
+                                  <CardTitle className="text-base flex items-center gap-2">
+                                    <FileText className="h-4 w-4" /> Medical Records
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-4 py-2">
+                                  <div className="text-center py-6 text-muted-foreground text-sm">
+                                    No medical records available
+                                  </div>
+                                </CardContent>
+                                <CardFooter className="px-4 py-3 border-t">
+                                  <Button variant="outline" size="sm" className="gap-1">
+                                    <FileText className="h-4 w-4" /> View All Records
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            </div>
+                            
+                            <div className="mt-4 flex gap-2 justify-end">
+                              <Button variant="outline" size="sm" className="gap-1">
+                                <CalendarClock className="h-4 w-4" /> Schedule Appointment
+                              </Button>
+                              <Button variant="default" size="sm" className="gap-1">
+                                <Stethoscope className="h-4 w-4" /> Add Medical Record
+                              </Button>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <h3 className="text-xl font-medium mb-2">No Patients</h3>
+                    <p className="text-muted-foreground mb-6">
+                      You don't have any patients yet.
+                    </p>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="appointments" className="mt-0">

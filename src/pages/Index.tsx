@@ -1,10 +1,10 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Layout from '@/components/layout/Layout';
-import { ArrowRight, Lock, ShieldCheck, Database } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Database, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import MedicalScene from '@/components/MedicalScene';
 
 const Index = () => {
   const { user } = useAuth();
@@ -47,22 +47,9 @@ const Index = () => {
                 )}
               </div>
             </div>
-            <div className="mx-auto lg:mx-0 relative">
-              <div className="relative mx-auto aspect-square max-w-sm overflow-hidden rounded-lg bg-gradient-to-br from-health-500 to-medical-600 p-8 shadow-xl">
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
-                <div className="relative flex flex-col items-center justify-center text-center text-white">
-                  <div className="size-24 rounded-full bg-white/10 flex items-center justify-center mb-6">
-                    <Lock className="h-12 w-12" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Decentralized</h3>
-                  <p className="text-white/80">Your medical data stored securely on the blockchain</p>
-                </div>
-              </div>
-              <div className="absolute -bottom-6 -right-6 size-24 rounded-lg bg-primary/20 backdrop-blur-md animate-float" />
-              <div className="absolute -top-6 -left-6 size-20 rounded-lg bg-medical-500/20 backdrop-blur-md animate-float" style={{ animationDelay: "2s" }} />
+            <div className="mx-auto lg:mx-0 relative h-[350px] w-full">
+              {/* 3D Doctor and Patient Scene */}
+              <MedicalScene />
             </div>
           </div>
         </div>

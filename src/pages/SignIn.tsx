@@ -60,8 +60,6 @@ const SignIn = () => {
       let errorMessage = 'Failed to sign in';
       if (error.message.includes('Invalid login credentials')) {
         errorMessage = 'Invalid email or password. Please try again.';
-      } else if (error.message.includes('Email not confirmed')) {
-        errorMessage = 'Please verify your email before signing in.';
       }
       
       toast.error(errorMessage);
@@ -105,12 +103,7 @@ const SignIn = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Enter your password" 

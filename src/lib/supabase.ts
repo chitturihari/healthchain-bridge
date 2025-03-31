@@ -41,6 +41,7 @@ export interface PatientData {
   aadhar_number: string;
   phone_number: string;
   is_married: boolean;
+  eth_address?: string;
   profile_photo_url?: string;
   created_at: string;
 }
@@ -52,18 +53,31 @@ export interface DoctorData {
   qualification: string;
   specialized_areas: string[];
   phone_number: string;
+  eth_address?: string;
   profile_photo_url?: string;
   created_at: string;
 }
 
+export interface PatientDoctorAccess {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  access_granted_at: string;
+  access_revoked_at?: string;
+  is_active: boolean;
+}
+
 // Authentication functions
-export async function signUp(email: string, password: string, role: UserRole) {
-  console.log(`Signing up user with email: ${email} and role: ${role}`);
+export async function signUp(email: string, password: string, role: UserRole, eth_address?: string) {
+  console.log(`Signing up user with email: ${email}, role: ${role}, and eth_address: ${eth_address || 'not provided'}`);
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { role }
+      data: { 
+        role,
+        eth_address
+      }
     }
   });
   
@@ -103,38 +117,6 @@ export async function signOut() {
     throw error;
   }
   console.log("Sign out successful");
-}
-
-export async function resetPassword(email: string) {
-  console.log(`Sending password reset for email: ${email}`);
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`
-  });
-  
-  if (error) {
-    console.error("Reset password error:", error);
-    throw error;
-  }
-  console.log("Password reset email sent successfully");
-}
-
-export async function updatePassword(new_password: string) {
-  console.log("Updating password");
-  try {
-    const { error } = await supabase.auth.updateUser({
-      password: new_password
-    });
-    
-    if (error) {
-      console.error("Update password error:", error);
-      throw error;
-    }
-    
-    console.log("Password updated successfully");
-  } catch (error) {
-    console.error("Update password error caught:", error);
-    throw error;
-  }
 }
 
 export async function getCurrentUser() {
@@ -220,13 +202,92 @@ export async function updateDoctorProfile(userId: string, updates: Partial<Docto
   return data[0] as DoctorData;
 }
 
-export async function updateUserEthAddress(userId: string, ethAddress: string) {
-  const { data, error } = await supabase.auth.updateUser({
-    data: { eth_address: ethAddress }
-  });
+// Get doctor's patients
+export async function getDoctorPatients(doctorId: string) {
+  const { data, error } = await supabase
+    .from('patient_doctor_access')
+    .select(`
+      id,
+      patient_id,
+      access_granted_at,
+      access_revoked_at,
+      is_active,
+      patients:patient_id (
+        id,
+        full_name,
+        date_of_birth,
+        blood_group,
+        weight,
+        phone_number,
+        profile_photo_url
+      )
+    `)
+    .eq('doctor_id', doctorId)
+    .eq('is_active', true)
+    .is('access_revoked_at', null);
   
   if (error) throw error;
-  return data.user;
+  return data;
+}
+
+// Get patient's doctors
+export async function getPatientDoctors(patientId: string) {
+  const { data, error } = await supabase
+    .from('patient_doctor_access')
+    .select(`
+      id,
+      doctor_id,
+      access_granted_at,
+      access_revoked_at,
+      is_active,
+      doctors:doctor_id (
+        id,
+        full_name,
+        qualification,
+        specialized_areas,
+        phone_number,
+        profile_photo_url
+      )
+    `)
+    .eq('patient_id', patientId)
+    .eq('is_active', true)
+    .is('access_revoked_at', null);
+  
+  if (error) throw error;
+  return data;
+}
+
+// Grant access to doctor
+export async function grantAccessToDoctor(patientId: string, doctorId: string) {
+  const { data, error } = await supabase
+    .from('patient_doctor_access')
+    .upsert({
+      patient_id: patientId,
+      doctor_id: doctorId,
+      is_active: true,
+      access_granted_at: new Date().toISOString(),
+      access_revoked_at: null
+    })
+    .select();
+  
+  if (error) throw error;
+  return data[0];
+}
+
+// Revoke access from doctor
+export async function revokeAccessFromDoctor(patientId: string, doctorId: string) {
+  const { data, error } = await supabase
+    .from('patient_doctor_access')
+    .update({
+      is_active: false,
+      access_revoked_at: new Date().toISOString()
+    })
+    .eq('patient_id', patientId)
+    .eq('doctor_id', doctorId)
+    .select();
+  
+  if (error) throw error;
+  return data[0];
 }
 
 // File storage

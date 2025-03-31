@@ -8,7 +8,6 @@ import {
   getDoctorProfile,
   PatientData,
   DoctorData,
-  updateUserEthAddress
 } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { getWalletAddress, connectToBlockchain } from '@/lib/blockchain';
@@ -22,7 +21,6 @@ type AuthContextType = {
   isWeb3Connected: boolean;
   refreshUser: () => Promise<void>;
   connectWallet: () => Promise<string | null>;
-  updateEthAddress: (address: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -73,11 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (address) {
           setEthAddress(address);
           setIsWeb3Connected(true);
-          
-          // If user is logged in, update their eth address in Supabase if it's not set
-          if (user && !user.eth_address && address) {
-            await updateEthAddress(address);
-          }
         }
       } catch (error) {
         console.error("Error checking wallet:", error);
@@ -96,11 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setEthAddress(address);
         setIsWeb3Connected(true);
         
-        // Update user record if logged in
-        if (user && address) {
-          await updateEthAddress(address);
-        }
-        
         toast.success('Wallet connected successfully');
         return address;
       } else {
@@ -111,21 +99,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error connecting wallet:', error);
       toast.error('Error connecting wallet');
       return null;
-    }
-  }
-  
-  // Update eth address in Supabase
-  async function updateEthAddress(address: string) {
-    try {
-      if (user) {
-        await updateUserEthAddress(user.id, address);
-        setUser({
-          ...user,
-          eth_address: address
-        });
-      }
-    } catch (error) {
-      console.error('Error updating eth address:', error);
     }
   }
 
@@ -182,8 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ethAddress,
       isWeb3Connected,
       refreshUser,
-      connectWallet,
-      updateEthAddress
+      connectWallet
     }}>
       {children}
     </AuthContext.Provider>

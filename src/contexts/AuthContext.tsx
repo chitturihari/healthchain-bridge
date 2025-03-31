@@ -46,9 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Listen for auth state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed, event:", event);
+      
       if (session?.user) {
+        console.log("Session user found, refreshing user data");
         await refreshUser();
       } else {
+        console.log("No session user, clearing user data");
         setUser(null);
         setPatientProfile(null);
         setDoctorProfile(null);
@@ -57,7 +61,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Initial load
-    refreshUser().then(() => setIsLoading(false));
+    refreshUser().then(() => {
+      console.log("Initial user data loaded");
+      setIsLoading(false);
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -70,8 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const address = await getWalletAddress();
         if (address) {
+          console.log("Web3 wallet connected:", address);
           setEthAddress(address);
           setIsWeb3Connected(true);
+        } else {
+          console.log("No Web3 wallet connected");
         }
       } catch (error) {
         console.error("Error checking wallet:", error);
@@ -84,15 +94,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Connect wallet function
   async function connectWallet() {
     try {
+      console.log("Attempting to connect wallet");
       const connected = await connectToBlockchain();
       if (connected) {
         const address = await getWalletAddress();
+        console.log("Wallet connected:", address);
         setEthAddress(address);
         setIsWeb3Connected(true);
         
         toast.success('Wallet connected successfully');
         return address;
       } else {
+        console.log("Failed to connect wallet");
         toast.error('Failed to connect wallet');
         return null;
       }
@@ -106,13 +119,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Refresh user data
   async function refreshUser() {
     try {
+      console.log("Refreshing user data");
       const authUser = await getCurrentUser();
       if (!authUser) {
+        console.log("No authenticated user found");
         setUser(null);
         setPatientProfile(null);
         setDoctorProfile(null);
         return;
       }
+
+      console.log("User authenticated:", authUser);
+      console.log("User metadata:", authUser.user_metadata);
 
       const userData = {
         id: authUser.id,
@@ -122,34 +140,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         created_at: authUser.created_at
       };
       
+      console.log("Setting user data:", userData);
       setUser(userData);
 
       // Fetch profile based on role
       if (userData.role === 'patient') {
         try {
+          console.log("Fetching patient profile for user:", userData.id);
           const patientData = await getPatientProfile(userData.id);
+          console.log("Patient profile fetched:", patientData);
           setPatientProfile(patientData);
           setDoctorProfile(null);
           
           // Update ethAddress if available in profile
-          if (patientData.eth_address) {
+          if (patientData?.eth_address) {
             setEthAddress(patientData.eth_address);
           }
         } catch (error) {
           console.error('Error fetching patient profile:', error);
+          // Allow continuing even if profile fetch fails
         }
       } else if (userData.role === 'doctor') {
         try {
+          console.log("Fetching doctor profile for user:", userData.id);
           const doctorData = await getDoctorProfile(userData.id);
+          console.log("Doctor profile fetched:", doctorData);
           setDoctorProfile(doctorData);
           setPatientProfile(null);
           
           // Update ethAddress if available in profile
-          if (doctorData.eth_address) {
+          if (doctorData?.eth_address) {
             setEthAddress(doctorData.eth_address);
           }
         } catch (error) {
           console.error('Error fetching doctor profile:', error);
+          // Allow continuing even if profile fetch fails
         }
       }
     } catch (error) {

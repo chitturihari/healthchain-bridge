@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Check if environment variables are available
@@ -92,7 +91,7 @@ export async function signUp(email: string, password: string, role: UserRole, et
     const signInResult = await signIn(email, password);
     
     console.log("Sign up successful:", data);
-    return signInResult;
+    return signInResult; // Return sign in result to trigger redirection
   } catch (error) {
     console.error("Sign up error caught:", error);
     throw error;
@@ -161,6 +160,7 @@ export async function updatePassword(newPassword: string) {
 }
 
 export async function resetPassword(email: string) {
+  console.log(`Sending password reset email to: ${email}`);
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password`,
   });
@@ -271,6 +271,7 @@ export async function revokeAccessFromDoctor(accessId: string) {
 
 // Get all patients that a doctor has access to
 export async function getDoctorPatients(doctorId: string) {
+  console.log(`Getting patients for doctor: ${doctorId}`);
   const { data, error } = await supabase
     .from('doctor_patient_access')
     .select(`
@@ -292,7 +293,12 @@ export async function getDoctorPatients(doctorId: string) {
     .eq('doctor_id', doctorId)
     .eq('is_active', true);
   
-  if (error) throw error;
+  if (error) {
+    console.error("Error getting doctor patients:", error);
+    throw error;
+  }
+  
+  console.log("Doctor patients retrieved:", data);
   return data;
 }
 

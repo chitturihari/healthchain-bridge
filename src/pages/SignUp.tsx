@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -92,17 +91,15 @@ const SignUp = () => {
       console.log("Sign up successful, refreshing user data");
       await refreshUser();
       
-      toast.success('Account created successfully! Redirecting to dashboard...');
+      toast.success('Account created successfully! Redirecting...');
       
-      // Explicitly navigate after a short delay
-      setTimeout(() => {
-        console.log("Navigating to dashboard");
-        if (data.role === 'patient') {
-          navigate('/patient-profile');
-        } else {
-          navigate('/doctor-profile');
-        }
-      }, 500);
+      // Direct navigation without setTimeout 
+      console.log("Navigating to profile");
+      if (data.role === 'patient') {
+        navigate('/patient-profile');
+      } else {
+        navigate('/doctor-profile');
+      }
       
     } catch (error: any) {
       console.error('Sign up error:', error);

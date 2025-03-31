@@ -43,8 +43,9 @@ const EmailVerification = () => {
       console.log("Sign in successful, refreshing user data");
       await refreshUser();
       toast.success('Signed in successfully');
-      // Use a small delay to ensure the toast is visible before navigation
-      setTimeout(() => navigate('/dashboard'), 1000);
+      
+      // Direct navigation
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Sign in error:', error);
       

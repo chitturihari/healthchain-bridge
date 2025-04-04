@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import Layout from '@/components/layout/Layout';
 import { ArrowRight, ShieldCheck, Database, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import MedicalScene from '@/components/MedicalScene';
 
 const Index = () => {
   const { user } = useAuth();
@@ -14,17 +13,15 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-gradient-to-b from-background to-accent/30">
         <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-            <div className="flex flex-col justify-center space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-balance">
-                  Secure Medical Records on the Blockchain
-                </h1>
-                <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  HealthDecentro empowers patients to own and control their medical data while securely sharing it with authorized healthcare providers.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="space-y-4 max-w-3xl mx-auto">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-balance">
+                Secure Medical Records on the Blockchain
+              </h1>
+              <p className="max-w-[600px] mx-auto text-muted-foreground md:text-xl">
+                HealthDecentro empowers patients to own and control their medical data while securely sharing it with authorized healthcare providers.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                 {user ? (
                   <Link to="/dashboard">
                     <Button size="lg" className="gap-1.5">
@@ -46,10 +43,6 @@ const Index = () => {
                   </>
                 )}
               </div>
-            </div>
-            <div className="mx-auto lg:mx-0 relative h-[350px] w-full">
-              {/* 3D Doctor and Patient Scene */}
-              <MedicalScene />
             </div>
           </div>
         </div>

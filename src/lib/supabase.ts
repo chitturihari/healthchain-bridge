@@ -66,7 +66,7 @@ export interface DoctorPatientAccess {
   is_active: boolean;
 }
 
-// Authentication functions
+// Simplified authentication functions
 export async function signUp(email: string, password: string, role: UserRole, eth_address: string) {
   console.log(`Signing up user with email: ${email}, role: ${role}, and eth_address: ${eth_address}`);
   try {
@@ -77,7 +77,9 @@ export async function signUp(email: string, password: string, role: UserRole, et
         data: { 
           role,
           eth_address
-        }
+        },
+        // No email confirmation required
+        emailRedirectTo: undefined
       }
     });
     
@@ -86,12 +88,8 @@ export async function signUp(email: string, password: string, role: UserRole, et
       throw error;
     }
     
-    // Auto sign in the user after registration
-    console.log("Attempting to auto sign-in after registration");
-    const signInResult = await signIn(email, password);
-    
     console.log("Sign up successful:", data);
-    return signInResult; // Return sign in result to trigger redirection
+    return data;
   } catch (error) {
     console.error("Sign up error caught:", error);
     throw error;
@@ -162,7 +160,7 @@ export async function updatePassword(newPassword: string) {
 export async function resetPassword(email: string) {
   console.log(`Sending password reset email to: ${email}`);
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${window.location.origin}/change-password`,
   });
   
   if (error) {

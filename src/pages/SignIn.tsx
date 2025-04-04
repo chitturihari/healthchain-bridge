@@ -53,15 +53,13 @@ const SignIn = () => {
       await refreshUser();
       toast.success('Signed in successfully');
       
-      // Fixed redirection - immediately navigate without setTimeout
+      // Immediate navigation to dashboard
       console.log("Navigating to dashboard");
       navigate('/dashboard');
 
     } catch (error: any) {
       console.error('Sign in error:', error);
-      
-      let errorMessage = 'Invalid email or password. Please try again.';
-      toast.error(errorMessage);
+      toast.error('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }

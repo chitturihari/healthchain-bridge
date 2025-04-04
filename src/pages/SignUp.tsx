@@ -81,7 +81,6 @@ const SignUp = () => {
 
     setIsLoading(true);
     try {
-      // Register the user with wallet address
       const signUpResult = await signUp(data.email, data.password, data.role, walletAddress);
       
       if (!signUpResult?.user) {
@@ -91,10 +90,8 @@ const SignUp = () => {
       console.log("Sign up successful, refreshing user data");
       await refreshUser();
       
-      toast.success('Account created successfully! Redirecting...');
+      toast.success('Account created successfully!');
       
-      // Direct navigation without setTimeout 
-      console.log("Navigating to profile");
       if (data.role === 'patient') {
         navigate('/patient-profile');
       } else {
